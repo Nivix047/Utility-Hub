@@ -51,20 +51,6 @@ h1:focus {
   display: flex;
   flex-direction: column;
 }
-.status {
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 12px;
-  font-weight: 600;
-  position: relative;
-}
-.status > div {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
 .topbar {
   display: flex;
   justify-content: space-between;
@@ -410,6 +396,21 @@ footer > span:last-child {
   }
 }
 
-.status {
-  justify-content: flex-end;
+
+.calendar-time {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #ffffff20;
+  width: 100%;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: #d5e7ce;
+}
+@media (max-width: 600px) {
+  .calendar-time {
+    margin-top: 10px;
+    padding-top: 9px;
+    font-size: 11px;
+  }
 }

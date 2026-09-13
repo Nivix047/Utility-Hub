@@ -21,11 +21,6 @@ export default function Hub() {
   }, [app]);
   return (
     <div className="shell">
-      <header className="status">
-        <span>
-          {now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-        </span>
-      </header>
       <div className="topbar">
         <a className="brand" href="#">
           <span>
@@ -72,6 +67,9 @@ export default function Hub() {
                   year: "numeric",
                 })}
               </span>
+              <time className="calendar-time" dateTime={now.toISOString()}>
+                {now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              </time>
             </div>
           </div>
           <div className="section-label">
