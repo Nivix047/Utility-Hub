@@ -78,7 +78,6 @@ export default function Hub() {
             <h2>
               Your apps <span>{apps.length.toString().padStart(2, "0")}</span>
             </h2>
-            <span>Small tools. Big difference.</span>
           </div>
           <div className="app-grid">
             {apps.map((a) => (
