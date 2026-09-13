@@ -104,7 +104,6 @@ export default function Hub() {
               <ArrowUpRight size={24} />
             </a>
           </div>
-          <div className="page-dot" aria-hidden="true" />
         </main>
       )}
       <footer>

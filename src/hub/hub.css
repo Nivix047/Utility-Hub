@@ -280,13 +280,6 @@ h1 {
   height: 37px;
   border-radius: 50%;
 }
-.page-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #dae4d3;
-  margin: 30px auto 12px;
-}
 footer {
   display: flex;
   align-items: center;
