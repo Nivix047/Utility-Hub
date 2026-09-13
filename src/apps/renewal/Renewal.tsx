@@ -34,7 +34,32 @@ const titles = {
   subject: "A subject line, ready to send.",
 };
 export default function Renewal() {
-  const [mode, setMode] = useState<Mode>("premium");
+  const [premiums, setPremiums] = useState<Values | null>(null);
+  return (
+    <div className={styles.app}>
+      <Tool mode="premium" onCalculated={setPremiums} />
+      {premiums && (
+        <div className={styles.followups}>
+          <p className={styles.description}>
+            This renewal is over threshold. Complete the rate increase note and
+            email subject below.
+          </p>
+          <Tool mode="note" premiums={premiums} />
+          <Tool mode="subject" />
+        </div>
+      )}
+    </div>
+  );
+}
+function Tool({
+  mode,
+  premiums,
+  onCalculated,
+}: {
+  mode: Mode;
+  premiums?: Values;
+  onCalculated?: (values: Values | null) => void;
+}) {
   const [drafts, setDrafts] = useState<Record<Mode, Values>>({
     premium: {},
     note: {},
@@ -53,6 +78,7 @@ export default function Renewal() {
     }
   }
   function clearResult() {
+    onCalculated?.(null);
     setResult("");
     setStats(null);
     setError("");
@@ -63,12 +89,13 @@ export default function Renewal() {
     clearResult();
     try {
       let text = "";
-      const v = drafts[mode];
+      const v = { ...drafts[mode], ...premiums };
       if (mode === "premium") {
         if (!v.renewal?.trim() || !v.expiring?.trim())
           throw new Error("Enter both premiums.");
         const r = calculate(Number(v.renewal), Number(v.expiring));
         setStats(r);
+        onCalculated?.(r.over ? v : null);
         text = r.message;
       } else text = mode === "note" ? rateNote(v) : subject(v);
       setResult(text);
@@ -78,59 +105,65 @@ export default function Renewal() {
     }
   }
   return (
-    <div className={styles.app}>
-      <div className={styles.tabs} aria-label="Calculator tools">
-        {(["premium", "note", "subject"] as Mode[]).map((m, i) => (
-          <button
-            key={m}
-            aria-pressed={mode === m}
-            onClick={() => {
-              setMode(m);
-              clearResult();
-            }}
-          >
-            {["Rate calculator", "Rate increase", "Email subject"][i]}
-          </button>
-        ))}
-      </div>
+    <section
+      className={styles.tool}
+      aria-label={
+        mode === "premium"
+          ? "Rate calculator"
+          : mode === "note"
+            ? "Rate increase"
+            : "Email subject"
+      }
+    >
       <div className={styles.layout}>
         <section>
-          <p className={styles.eyebrow}>RENEWAL CALCULATOR</p>
+          <p className={styles.eyebrow}>
+            {mode === "premium"
+              ? "RATE CALCULATOR"
+              : mode === "note"
+                ? "RATE INCREASE"
+                : "EMAIL SUBJECT"}
+          </p>
           <h2>{titles[mode]}</h2>
           <p className={styles.description}>
             {mode === "premium"
               ? "Compare premiums, check the threshold, and copy a ready-to-use note."
               : mode === "note"
-                ? "Build a complete renewal note from the policy details you have. All fields are optional."
+                ? "Your compared premiums are included automatically. Add any other policy details below."
                 : "Create the original renewal threshold subject line. All fields are optional."}
           </p>
           <form onSubmit={submit}>
             <div className={styles.fields}>
-              {fields[mode].map(([key, label, type]) => (
-                <label key={key}>
-                  {label}
-                  <input
-                    type={type || "text"}
-                    step={key === "yearBuilt" ? "1" : "any"}
-                    min={type === "number" ? 0 : undefined}
-                    placeholder={
-                      type === "number"
-                        ? "0.00"
-                        : type === "date"
-                          ? undefined
-                          : label
-                    }
-                    value={drafts[mode][key] || ""}
-                    onChange={(e) => {
-                      setDrafts({
-                        ...drafts,
-                        [mode]: { ...drafts[mode], [key]: e.target.value },
-                      });
-                      clearResult();
-                    }}
-                  />
-                </label>
-              ))}
+              {fields[mode]
+                .filter(
+                  ([key]) =>
+                    !(premiums && (key === "renewal" || key === "expiring")),
+                )
+                .map(([key, label, type]) => (
+                  <label key={key}>
+                    {label}
+                    <input
+                      type={type || "text"}
+                      step={key === "yearBuilt" ? "1" : "any"}
+                      min={type === "number" ? 0 : undefined}
+                      placeholder={
+                        type === "number"
+                          ? "0.00"
+                          : type === "date"
+                            ? undefined
+                            : label
+                      }
+                      value={drafts[mode][key] || ""}
+                      onChange={(e) => {
+                        setDrafts({
+                          ...drafts,
+                          [mode]: { ...drafts[mode], [key]: e.target.value },
+                        });
+                        clearResult();
+                      }}
+                    />
+                  </label>
+                ))}
             </div>
             {error && (
               <p role="alert" className={styles.error}>
@@ -199,6 +232,6 @@ export default function Renewal() {
           )}
         </aside>
       </div>
-    </div>
+    </section>
   );
 }

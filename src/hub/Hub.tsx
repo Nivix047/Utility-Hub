@@ -1,13 +1,5 @@
 import { Suspense, useEffect, useState } from "react";
-import {
-  ArrowLeft,
-  ArrowUpRight,
-  Grid2X2,
-  ShieldCheck,
-  Wifi,
-  BatteryFull,
-  Signal,
-} from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Grid2X2, ShieldCheck } from "lucide-react";
 import { apps } from "./registry";
 export default function Hub() {
   const [route, setRoute] = useState(location.hash.slice(1));
@@ -33,12 +25,6 @@ export default function Hub() {
         <span>
           {now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
         </span>
-        <span className="island" aria-hidden="true" />
-        <div aria-label="Utility Hub">
-          <Signal size={15} />
-          <Wifi size={16} />
-          <BatteryFull size={20} />
-        </div>
       </header>
       <div className="topbar">
         <a className="brand" href="#">
@@ -47,9 +33,6 @@ export default function Hub() {
           </span>
           Utility Hub<span className="version">PERSONAL WORKSPACE</span>
         </a>
-        <span className="local">
-          <i /> All in your browser
-        </span>
       </div>
       {App ? (
         <main className="app-page">
@@ -126,11 +109,10 @@ export default function Hub() {
             </a>
           </div>
           <div className="page-dot" aria-hidden="true" />
-          <p className="home-hint">A familiar home for your everyday tools.</p>
         </main>
       )}
       <footer>
-        <span>Made for your day-to-day.</span>
+        {!App && <span>Made for your day-to-day.</span>}
         <a href="#">
           <Grid2X2 size={15} /> Home
         </a>

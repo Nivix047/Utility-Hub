@@ -1,45 +1,57 @@
 import { test, expect } from "@playwright/test";
-test("launcher, all tools, copy, validation, reset and navigation", async ({
+
+test("single-page threshold flow, copying, reset, and navigation", async ({
   page,
   context,
 }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/");
+  await expect(page.getByText("All in your browser")).toHaveCount(0);
+  await expect(
+    page.getByText("A familiar home for your everyday tools."),
+  ).toHaveCount(0);
   await page
     .getByRole("link", { name: "Renewal Calculator Insurance", exact: true })
     .click();
-  await page.getByLabel("Renewing premium", { exact: true }).fill("1100");
+  await expect(page.getByText("Made for your day-to-day.")).toHaveCount(0);
+  const calculator = page.getByRole("region", {
+    name: "Rate calculator",
+    exact: true,
+  });
+  const note = page.getByRole("region", { name: "Rate increase", exact: true });
+  const email = page.getByRole("region", {
+    name: "Email subject",
+    exact: true,
+  });
+  await expect(note).toHaveCount(0);
+  await page.getByLabel("Renewing premium", { exact: true }).fill("1050");
   await page.getByLabel("Expiring premium", { exact: true }).fill("1000");
-  await page.getByRole("button", { name: "Generate & copy" }).click();
-  await expect(
-    page.getByText("ren.prem.over.threshold", { exact: true }),
-  ).toBeVisible();
+  await calculator.getByRole("button", { name: "Generate & copy" }).click();
+  await expect(note).toHaveCount(0);
+  await expect(email).toHaveCount(0);
   await expect
     .poll(() => page.evaluate(() => navigator.clipboard.readText()))
-    .toBe("ren.prem.over.threshold");
-  await page.getByRole("button", { name: "Reset", exact: true }).click();
-  await expect(page.getByText("Ready when you are")).toBeVisible();
-  await page.getByLabel("Expiring premium", { exact: true }).fill("0");
-  await page.getByLabel("Renewing premium", { exact: true }).fill("100");
-  await page.getByRole("button", { name: "Generate & copy" }).click();
-  await expect(page.getByRole("alert")).toContainText("greater than zero");
-  await page
-    .getByRole("button", { name: "Rate increase", exact: true })
-    .click();
-  await page.getByLabel("Emailed who", { exact: true }).fill("Jane");
-  await page.getByRole("button", { name: "Generate & copy" }).click();
-  await expect(page.getByText("Emailed Jane.", { exact: true })).toBeVisible();
-  await page
-    .getByRole("button", { name: "Email subject", exact: true })
-    .click();
-  await page.getByLabel("Last name", { exact: true }).fill("Smith");
-  await page.getByLabel("First name", { exact: true }).fill("Jane");
-  await page.getByLabel("Effective date", { exact: true }).fill("2026-09-13");
-  await page.getByRole("button", { name: "Generate & copy" }).click();
+    .toContain("approx 5% increase");
+  await page.getByLabel("Renewing premium", { exact: true }).fill("1100");
+  await calculator.getByRole("button", { name: "Generate & copy" }).click();
+  await expect(note).toBeVisible();
+  await expect(email).toBeVisible();
+  await note.getByLabel("Emailed who", { exact: true }).fill("Jane");
+  await note.getByRole("button", { name: "Generate & copy" }).click();
   await expect(
-    page.getByText("Smith, Jane (ren.prem.over.threshold) eff:09/13/26", {
+    note.getByText(
+      "Per DL FT $1,100.00 (was $1,000.00) approx 10.00% increase. Emailed Jane.",
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await email.getByLabel("Last name", { exact: true }).fill("Smith");
+  await email.getByLabel("First name", { exact: true }).fill("Jane");
+  await email.getByLabel("Effective date", { exact: true }).fill("2026-09-13");
+  await email.getByRole("button", { name: "Generate & copy" }).click();
+  await expect(
+    email.getByText("Smith, Jane (ren.prem.over.threshold) eff:09/13/26", {
       exact: true,
     }),
   ).toBeVisible();
@@ -48,20 +60,28 @@ test("launcher, all tools, copy, validation, reset and navigation", async ({
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
-  await page.getByRole("link", { name: "Home", exact: true }).first().click();
-  await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "A little hub.",
-  );
-  await page.goBack();
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Renewal Calculator",
-  );
-  await page.reload();
+  await page.getByLabel("Renewing premium", { exact: true }).fill("1050");
+  await expect(note).toHaveCount(0);
+  await expect(email).toHaveCount(0);
+  await calculator.getByRole("button", { name: "Generate & copy" }).click();
+  await expect(note).toHaveCount(0);
+  await calculator.getByRole("button", { name: "Reset", exact: true }).click();
   await expect(
-    page.getByRole("button", { name: "Rate calculator", exact: true }),
-  ).toBeVisible();
+    page.getByLabel("Renewing premium", { exact: true }),
+  ).toHaveValue("");
+  await page.getByLabel("Renewing premium", { exact: true }).fill("100");
+  await page.getByLabel("Expiring premium", { exact: true }).fill("0");
+  await calculator.getByRole("button", { name: "Generate & copy" }).click();
+  await expect(page.getByRole("alert")).toContainText("greater than zero");
+  await page.getByRole("link", { name: "Home", exact: true }).first().click();
+  await expect(page.locator("h1")).toContainText("A little hub.");
+  await page.goBack();
+  await expect(page.locator("h1")).toHaveText("Renewal Calculator");
+  await page.reload();
+  await expect(calculator).toBeVisible();
   expect(errors).toEqual([]);
 });
+
 test("clipboard denial keeps the generated text usable", async ({ page }) => {
   await page.addInitScript(() =>
     Object.defineProperty(navigator, "clipboard", {

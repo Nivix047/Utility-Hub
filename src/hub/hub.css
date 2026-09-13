@@ -65,15 +65,6 @@ h1:focus {
   align-items: center;
   gap: 6px;
 }
-.island {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #14282b;
-  width: 95px;
-  height: 23px;
-  border-radius: 20px;
-}
 .topbar {
   display: flex;
   justify-content: space-between;
@@ -103,19 +94,6 @@ h1:focus {
   font-weight: 400;
   margin-left: 17px;
   color: #afc4c0;
-}
-.local {
-  font-size: 11px;
-  color: #c4d4cf;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-.local i {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #b6dda1;
 }
 .home {
   width: 100%;
@@ -309,12 +287,6 @@ h1 {
   background: #dae4d3;
   margin: 30px auto 12px;
 }
-.home-hint {
-  text-align: center;
-  color: #9db5ad;
-  font-size: 10px;
-  margin-bottom: 29px;
-}
 footer {
   display: flex;
   align-items: center;
@@ -443,4 +415,8 @@ footer > span:last-child {
   * {
     transition: none !important;
   }
+}
+
+.status {
+  justify-content: flex-end;
 }

@@ -35,6 +35,8 @@ Hash navigation supports browser Back/Forward, reloads and static hosting withou
 
 Inspected and migrated from [Nivix047/React-Renewal-Calculator](https://github.com/Nivix047/React-Renewal-Calculator), commit `29ac664772a12b64f43884f209797d3ac0aba4c1`. The source repository is unchanged.
 
+The original tools are combined on one page. Comparing premiums at or above both thresholds reveals the rate increase and email subject forms below the result. The note automatically uses the compared premiums. Changing premiums hides the follow-up forms and clears their drafts until another over-threshold calculation. Below threshold, only the standard generate-and-copy result is shown.
+
 All three original tools are included:
 
 1. **Rate calculator:** premium difference, percentage change, original message wording and rounding rules, and a threshold requiring both a 10% increase and a $100 increase.
