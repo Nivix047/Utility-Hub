@@ -29,7 +29,7 @@ npm run test:e2e  # Desktop and mobile browser checks
 
 Add each future application under `src/apps/<id>/`, export its root component, then register its unique ID, name, category, icon and lazy-loaded component in `src/hub/registry.ts`. The shared shell supplies the Home control. Give future apps their own CSS modules and logic. The initial version includes only the functioning calculator; there are no misleading placeholder apps.
 
-Hash navigation supports browser Back/Forward, reloads and static hosting without server rewrites. Vite uses relative asset paths. Serve `dist/` with a static host; this project does not configure deployment automatically.
+Hash navigation supports browser Back/Forward, reloads and static hosting without server rewrites. Vite uses relative asset paths. Serve `dist/` with a static host; the included GitHub Actions workflow builds and publishes the site after Pages is enabled.
 
 ## Migration
 
@@ -50,3 +50,7 @@ Drafts are held only in memory while the calculator is open. Returning Home or r
 ## Verification in the build environment
 
 Production build and all six logic tests pass. The built-in browser verified launcher opening, threshold results, clipboard contents, invalid baseline feedback, reset, detailed notes, and subject generation. The mobile form was inspected at 390px with no horizontal overflow. The standalone Playwright suite is included but could not execute here: macOS sandbox restrictions prevent Chromium from registering its process service. Run `npm run test:e2e` outside that sandbox to complete automated browser verification. Native date entry could not be fully driven by the built-in browser automation; date formatting is covered by the logic tests.
+
+## GitHub Pages
+
+After pushing to `Nivix047/Utility-Hub`, open repository **Settings → Pages**, choose **GitHub Actions** as the source, then run **Publish Utility Hub** from the **Actions** tab if the first push ran before Pages was enabled. Subsequent pushes to `main` test, build and publish automatically. The expected URL is https://nivix047.github.io/Utility-Hub/ once deployment succeeds.
