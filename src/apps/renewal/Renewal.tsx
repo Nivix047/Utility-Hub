@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { ArrowUpRight, Copy, RotateCcw, Check } from "lucide-react";
 import { calculate, rateNote, subject, diarySubject, type Values } from "./logic";
 import styles from "./renewal.module.css";
@@ -37,9 +37,10 @@ const titles = {
 };
 export default function Renewal() {
   const [premiums, setPremiums] = useState<Values | null>(null);
+  const [diaryDate, setDiaryDate] = useState<{value: string}>({value: ""});
   return (
     <div className={styles.app}>
-      <Tool mode="premium" onCalculated={setPremiums} />
+      <Tool mode="premium" onCalculated={(values) => { setPremiums(values); if (!values) setDiaryDate({value: ""}); }} />
       {premiums && (
         <div className={styles.followups}>
           <p className={styles.description}>
@@ -47,8 +48,8 @@ export default function Renewal() {
             diary and email subjects below.
           </p>
           <Tool mode="note" premiums={premiums} />
-          <Tool mode="diary" />
-          <Tool mode="subject" />
+          <Tool mode="diary" onDateChange={(value) => setDiaryDate({value})} />
+          <Tool mode="subject" incomingDate={diaryDate} />
         </div>
       )}
     </div>
@@ -58,8 +59,12 @@ function Tool({
   mode,
   premiums,
   onCalculated,
+  onDateChange,
+  incomingDate,
 }: {
   mode: Mode;
+  onDateChange?: (value: string) => void;
+  incomingDate?: {value: string};
   premiums?: Values;
   onCalculated?: (values: Values | null) => void;
 }) {
@@ -73,6 +78,13 @@ function Tool({
   const [error, setError] = useState("");
   const [copy, setCopy] = useState("");
   const [stats, setStats] = useState<ReturnType<typeof calculate> | null>(null);
+  useEffect(() => {
+    if (!incomingDate) return;
+    setDrafts(previous => ({...previous, subject: {...previous.subject, effDate: incomingDate.value}}));
+    setResult("");
+    setError("");
+    setCopy("");
+  }, [incomingDate]);
   async function copyText(text: string) {
     try {
       await navigator.clipboard.writeText(text);
@@ -160,6 +172,7 @@ function Tool({
                       }
                       value={drafts[mode][key] || ""}
                       onChange={(e) => {
+                        if (key === "effDate") onDateChange?.(e.target.value);
                         setDrafts({
                           ...drafts,
                           [mode]: { ...drafts[mode], [key]: e.target.value },
@@ -182,6 +195,7 @@ function Tool({
               <button
                 type="button"
                 onClick={() => {
+                  onDateChange?.("");
                   setDrafts({ ...drafts, [mode]: {} });
                   clearResult();
                 }}
