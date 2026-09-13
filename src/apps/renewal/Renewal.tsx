@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { ArrowUpRight, Copy, RotateCcw, Check } from "lucide-react";
-import { calculate, rateNote, subject, type Values } from "./logic";
+import { calculate, rateNote, subject, diarySubject, type Values } from "./logic";
 import styles from "./renewal.module.css";
-type Mode = "premium" | "note" | "subject";
+type Mode = "premium" | "note" | "diary" | "subject";
 type Field = [string, string, string?];
 const premium: Field[] = [
   ["renewal", "Renewing premium", "number"],
@@ -21,6 +21,7 @@ const fields: Record<Mode, Field[]> = {
     ["effDate", "Effective date", "date"],
     ["emailedWho", "Emailed who"],
   ],
+  diary: [["policyType", "Type of policy"], ["term", "Term"], ["effDate", "Effective date", "date"]],
   subject: [
     ["lastName", "Last name"],
     ["firstName", "First name"],
@@ -31,6 +32,7 @@ const fields: Record<Mode, Field[]> = {
 const titles = {
   premium: "A clearer view of your renewal.",
   note: "All the details, one clear note.",
+  diary: "A diary subject, ready to copy.",
   subject: "A subject line, ready to send.",
 };
 export default function Renewal() {
@@ -42,9 +44,10 @@ export default function Renewal() {
         <div className={styles.followups}>
           <p className={styles.description}>
             This renewal is over threshold. Complete the rate increase note and
-            email subject below.
+            diary and email subjects below.
           </p>
           <Tool mode="note" premiums={premiums} />
+          <Tool mode="diary" />
           <Tool mode="subject" />
         </div>
       )}
@@ -63,6 +66,7 @@ function Tool({
   const [drafts, setDrafts] = useState<Record<Mode, Values>>({
     premium: {},
     note: {},
+    diary: {},
     subject: {},
   });
   const [result, setResult] = useState("");
@@ -97,7 +101,7 @@ function Tool({
         setStats(r);
         onCalculated?.(r.over ? v : null);
         text = r.message;
-      } else text = mode === "note" ? rateNote(v) : subject(v);
+      } else text = mode === "note" ? rateNote(v) : mode === "diary" ? diarySubject(v) : subject(v);
       setResult(text);
       void copyText(text);
     } catch (e) {
@@ -112,7 +116,7 @@ function Tool({
           ? "Rate calculator"
           : mode === "note"
             ? "Rate increase"
-            : "Email subject"
+            : mode === "diary" ? "Diary subject" : "Email subject"
       }
     >
       <div className={styles.layout}>
@@ -122,7 +126,7 @@ function Tool({
               ? "RATE CALCULATOR"
               : mode === "note"
                 ? "RATE INCREASE"
-                : "EMAIL SUBJECT"}
+                : mode === "diary" ? "DIARY SUBJECT" : "EMAIL SUBJECT"}
           </p>
           <h2>{titles[mode]}</h2>
           <p className={styles.description}>
@@ -130,7 +134,7 @@ function Tool({
               ? "Compare premiums, check the threshold, and copy a ready-to-use note."
               : mode === "note"
                 ? "Your compared premiums are included automatically. Add any other policy details below."
-                : "Create the original renewal threshold subject line. All fields are optional."}
+                : mode === "diary" ? "Enter the policy type, term, and effective date to create your diary subject." : "Create the original renewal threshold subject line. All fields are optional."}
           </p>
           <form onSubmit={submit}>
             <div className={styles.fields}>
@@ -144,6 +148,7 @@ function Tool({
                     {label}
                     <input
                       type={type || "text"}
+                      required={mode === "diary"}
                       step={key === "yearBuilt" ? "1" : "any"}
                       min={type === "number" ? 0 : undefined}
                       placeholder={
