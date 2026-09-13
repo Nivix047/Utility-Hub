@@ -72,9 +72,6 @@ export default function Hub() {
                   year: "numeric",
                 })}
               </span>
-              <div>
-                <span className="sun">✳</span> A fresh start, every day.
-              </div>
             </div>
           </div>
           <div className="section-label">
@@ -112,7 +109,6 @@ export default function Hub() {
         </main>
       )}
       <footer>
-        {!App && <span>Made for your day-to-day.</span>}
         <a href="#">
           <Grid2X2 size={15} /> Home
         </a>
