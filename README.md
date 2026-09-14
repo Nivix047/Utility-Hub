@@ -41,15 +41,16 @@ The over-threshold flow now collects client last/first names, policy number, eff
 - Producer names are grouped ignoring case and repeated spaces. The same producer, policy number and effective date updates an existing entry instead of duplicating it.
 - “Next client” clears the calculator and current form, keeping saved lists. Changing premiums clears the unsaved client form; add the client first.
 - Remove a saved entry with Undo available for the latest removal.
+- **Clear all renewal data** prompts Yes/No and clears all saved renewal lists, unsaved form values and removal/Undo state for this tab. It does not touch other apps, other browser tabs, or downloaded PDFs. Existing saved message snapshots are unchanged by formatting updates; re-add the policy to replace an older message.
 - Saved lists use `sessionStorage`: retained across refresh and Home navigation in the same tab, normally cleared when that tab is closed. Browser session restoration can retain them. This is not a durable database or cross-device sync. Download PDFs before closing the tab. Storage failures are shown in the UI.
-- Producer name replaces “Emailed who.” Adding or exporting clients does not send emails. The separate diary/email generator forms have been replaced by this producer review workflow.
+- The rate company has a separate optional effective date; the policy effective date is used only for client information and duplicate matching. Messages end with `Emailed [producer name].` Producer name replaces “Emailed who.” Adding or exporting clients does not send emails. The separate diary/email generator forms have been replaced by this producer review workflow.
 - Below-threshold calculations still generate and copy the original note. Clipboard access requires localhost or HTTPS; selectable results remain available when copying is denied.
 
 Date formatting avoids timezone shifts, zero expiring baselines and negative amounts are rejected, and the exact 10% plus $100 threshold is preserved. The only external UI request is Google Fonts, with local system-font fallbacks. PDF fonts are bundled and loaded only when exporting; the large PDF library is a separate lazy-loaded chunk.
 
 ## Verification
 
-`npm run build` and all 12 tests pass, covering calculation boundaries, record validation, producer grouping, duplicate updates, storage parsing and multi-page PDF rendering. A five-page stress PDF was visually checked and all 24 sample policy IDs and accented names were verified in its extracted text. Browser interaction tests are included in `tests/`; standalone Playwright browser launch was blocked by this Mac's sandbox, so interactive verification uses the built-in browser instead.
+`npm run build` and all 13 tests pass, covering calculation boundaries, record validation, producer grouping, duplicate updates, storage parsing and multi-page PDF rendering. A five-page stress PDF was visually checked and all 24 sample policy IDs and accented names were verified in its extracted text. Browser interaction tests are included in `tests/`; standalone Playwright browser launch was blocked by this Mac's sandbox, so interactive verification uses the built-in browser instead.
 
 ## GitHub Pages
 

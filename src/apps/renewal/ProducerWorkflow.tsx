@@ -1,8 +1,9 @@
 import { useState, type FormEvent } from "react";
 import { Copy, FileDown, Plus, Trash2 } from "lucide-react";
-import { rateNote, type Values } from "./logic";
+import { type Values } from "./logic";
 import {
   makeRecord,
+  producerMessage,
   groupRecords,
   recordKey,
   saveRecord,
@@ -15,7 +16,7 @@ const clients = [
   ["lastName", "Last name"],
   ["firstName", "First name"],
   ["policyNumber", "Policy number"],
-  ["effDate", "Effective date", "date"],
+  ["effDate", "Policy effective date", "date"],
   ["producer", "Producer name"],
 ];
 const details = [
@@ -25,6 +26,7 @@ const details = [
   ["yearBuilt", "Year built", "number"],
   ["squareFeet", "Square feet", "number"],
   ["company", "Rate company"],
+  ["rateEffDate", "Rate company effective date", "date"],
 ];
 export function ClientRenewal({
   premiums,
@@ -43,7 +45,7 @@ export function ClientRenewal({
   let message = "",
     noteError = "";
   try {
-    message = rateNote({ ...premiums, ...values });
+    message = producerMessage({ ...premiums, ...values });
   } catch (e) {
     noteError = (e as Error).message;
   }

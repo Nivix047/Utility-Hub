@@ -12,6 +12,9 @@ export type RenewalRecord = {
 };
 export const producerKey = (name: string) =>
   name.trim().replace(/\s+/g, " ").toLocaleLowerCase("en-US");
+export function producerMessage(values: Values) {
+  return rateNote({ ...values, effDate: values.rateEffDate || "", emailedWho: (values.producer || "").trim().replace(/\s+/g, " ") });
+}
 export function makeRecord(values: Values): RenewalRecord {
   const clean = (key: string) => (values[key] || "").trim();
   for (const key of [
@@ -44,7 +47,7 @@ export function makeRecord(values: Values): RenewalRecord {
     producer: clean("producer").replace(/\s+/g, " "),
     renewal,
     expiring,
-    message: rateNote({ ...values, emailedWho: "" }),
+    message: producerMessage(values),
   };
 }
 export const recordKey = (r: RenewalRecord) =>

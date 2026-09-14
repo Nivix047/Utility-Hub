@@ -16,7 +16,7 @@ test("producer workflow, duplicate update, download, persistence, and removal", 
   await page.getByLabel("Last name", { exact: true }).fill("Smith");
   await page.getByLabel("First name", { exact: true }).fill("Jane");
   await page.getByLabel("Policy number", { exact: true }).fill("P100");
-  await page.getByLabel("Effective date", { exact: true }).fill("2026-09-13");
+  await page.getByLabel("Policy effective date", { exact: true }).fill("2026-09-13");
   await page.getByLabel("Producer name", { exact: true }).fill("Alex");
   await page
     .getByRole("button", { name: "Add client to producer list", exact: true })
@@ -64,6 +64,16 @@ test("producer workflow, duplicate update, download, persistence, and removal", 
     .getByRole("link", { name: "Renewal Calculator Insurance", exact: true })
     .click();
   await expect(alex).toBeVisible();
+  await page.getByRole("button", {name:"Clear all renewal data",exact:true}).click();
+  await page.getByRole("button", {name:"No, keep my data",exact:true}).click();
+  await expect(alex).toBeVisible();
+  await page.getByRole("button", {name:"Clear all renewal data",exact:true}).click();
+  await page.getByRole("button", {name:"Yes, delete all renewal data",exact:true}).click();
+  await expect(alex).toHaveCount(0);
+  await expect(page.getByRole("button", {name:"Undo",exact:true})).toHaveCount(0);
+  await page.reload();
+  await expect(alex).toHaveCount(0);
+  await expect(beth).toHaveCount(0);
   expect(errors).toEqual([]);
 });
 test("below threshold keeps simple copying and rejects zero baselines", async ({

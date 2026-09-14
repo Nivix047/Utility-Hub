@@ -20,7 +20,10 @@ function initialList() {
   }
 }
 export default function Renewal() {
-  const [initial] = useState(initialList);
+  const [initial, setInitial] = useState(initialList);
+  const [confirmClear, setConfirmClear] = useState(false);
+  const [clearVersion, setClearVersion] = useState(0);
+  const [clearStatus, setClearStatus] = useState("");
   const [records, setRecords] = useState<RenewalRecord[]>(initial.records);
   const [storageWarning, setStorageWarning] = useState(initial.warning);
   const [premiums, setPremiums] = useState<Values>({});
@@ -30,7 +33,8 @@ export default function Renewal() {
   useEffect(() => {
     if (initial.warning) return;
     try {
-      sessionStorage.setItem(storageKey, JSON.stringify(records));
+      if (records.length) sessionStorage.setItem(storageKey, JSON.stringify(records));
+      else sessionStorage.removeItem(storageKey);
       setStorageWarning("");
     } catch {
       setStorageWarning(
@@ -38,6 +42,18 @@ export default function Renewal() {
       );
     }
   }, [records, initial.warning]);
+  function clearAll() {
+    let warning = "";
+    try { sessionStorage.removeItem(storageKey); }
+    catch { warning = "The form and in-memory lists were cleared, but browser storage could not be accessed. Close this tab to discard its session data."; }
+    setInitial({records: [], warning});
+    setRecords([]);
+    setStorageWarning(warning);
+    nextClient();
+    setClearVersion(v => v + 1);
+    setConfirmClear(false);
+    setClearStatus(warning ? "In-memory data cleared." : "All renewal data in this tab has been cleared.");
+  }
   function clearResult() {
     setStats(null);
     setError("");
@@ -187,7 +203,19 @@ export default function Renewal() {
           {storageWarning}
         </p>
       )}
-      <ProducerLists records={records} onChange={setRecords} />
+      <ProducerLists key={clearVersion} records={records} onChange={setRecords} />
+      <div className={styles.followups}>
+        <button type="button" onClick={() => { setConfirmClear(true); setClearStatus(""); }}>Clear all renewal data</button>
+        {confirmClear && <section role="alertdialog" aria-labelledby="clear-title" aria-describedby="clear-description" className={styles.messagePreview}>
+          <h3 id="clear-title">Are you sure?</h3>
+          <p id="clear-description">Delete all saved producer lists and current form data from this browser tab? This cannot be undone. Downloaded PDFs and other websites’ data are not affected.</p>
+          <div className={styles.actions}>
+            <button type="button" onClick={clearAll}>Yes, delete all renewal data</button>
+            <button type="button" autoFocus onClick={() => setConfirmClear(false)}>No, keep my data</button>
+          </div>
+        </section>}
+        <p role="status" className={styles.copy}>{clearStatus}</p>
+      </div>
     </div>
   );
 }

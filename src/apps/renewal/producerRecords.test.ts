@@ -3,6 +3,7 @@ import { expect, it } from "vitest";
 import {
   groupRecords,
   makeRecord,
+  producerMessage,
   parseRecords,
   saveRecord,
 } from "./producerRecords";
@@ -15,12 +16,12 @@ const input = {
   renewal: "1100",
   expiring: "1000",
 };
-it("builds client records without claiming an email was sent", () => {
+it("builds client records with the producer email note", () => {
   const r = makeRecord(input);
   expect(r.producer).toBe("Alex Lee");
   expect(r.lastName).toBe("Smith");
   expect(r.message).toContain("10.00% increase");
-  expect(r.message).not.toContain("Emailed");
+  expect(r.message).toContain("Emailed Alex Lee.");
 });
 it("rejects incomplete clients, invalid dates and below-threshold renewals", () => {
   for (const patch of [
@@ -61,4 +62,12 @@ it("round trips browser-tab storage and rejects malformed data", () => {
   expect(parseRecords(null)).toEqual([]);
   expect(() => parseRecords("{}")).toThrow();
   expect(() => parseRecords("[{}]")).toThrow();
+});
+
+it("keeps policy and company effective dates independent", () => {
+ const values = {...input, renewal: "1000", expiring: "200", covRenewal:"300000", covExpiring:"200000", deductible:"5000", yearBuilt:"1985", squareFeet:"2000", company:"Cal Auto", effDate:"2026-10-01", rateEffDate:"2026-09-13"};
+ const record = makeRecord(values);
+ expect(record.effDate).toBe("2026-10-01");
+ expect(record.message).toBe("Per DL FT $1,000.00 (was $200.00) approx 400.00% increase. Cov.A at $300,000.00 (was $200,000.00) 50.00% increase. $5,000.00 deductible. Home built in 1985. 2,000 square ft. Cal Auto rate increase eff:09/13/26. Emailed Alex Lee.");
+ expect(producerMessage({...values, rateEffDate:""})).not.toContain("eff:");
 });
