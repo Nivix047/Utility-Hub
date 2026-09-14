@@ -253,3 +253,7 @@
     font-size: 16px;
   }
 }
+
+.comments { grid-column: 1 / -1; }
+.comments textarea { width: 100%; resize: vertical; min-height: 100px; padding: 13px 12px; border: 1px solid #d9dfd2; border-radius: 9px; font: inherit; line-height: 1.6; color: #263d32; background: white; }
+.comments textarea:focus { outline: 2px solid #759b63; outline-offset: 2px; }

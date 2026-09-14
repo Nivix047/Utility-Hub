@@ -88,6 +88,8 @@ export function rateNote(v: Values) {
       `${v.company?.trim() ? v.company.trim() + " " : ""}${Number.isFinite(rate) ? (rate >= 0 ? "rate increase" : "rate decrease") : "Rate change"}${v.effDate ? ` eff:${dateLabel(v.effDate)}` : ""}.`,
     );
   }
+  const comments = v.comments?.trim();
+  if (comments) parts.push(/[.!?]$/.test(comments) ? comments : `${comments}.`);
   if (v.emailedWho?.trim()) parts.push(`Emailed ${v.emailedWho.trim()}.`);
   if (!parts.length)
     throw new Error(

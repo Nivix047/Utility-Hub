@@ -71,3 +71,10 @@ it("keeps policy and company effective dates independent", () => {
  expect(record.message).toBe("Per DL FT $1,000.00 (was $200.00) approx 400.00% increase. Cov.A at $300,000.00 (was $200,000.00) 50.00% increase. $5,000.00 deductible. Home built in 1985. 2,000 square ft. Cal Auto rate increase eff:09/13/26. Emailed Alex Lee.");
  expect(producerMessage({...values, rateEffDate:""})).not.toContain("eff:");
 });
+
+it("includes optional findings between the company date and producer in saved messages", () => {
+ const values = {...input, company:"Cal Auto", rateEffDate:"2026-07-01", comments:"  Reviewed roof condition  "};
+ expect(makeRecord(values).message).toContain("Cal Auto rate increase eff:07/01/26. Reviewed roof condition. Emailed Alex Lee.");
+ expect(producerMessage({...values,comments:"Reviewed."})).toContain("Reviewed. Emailed Alex Lee.");
+ expect(producerMessage({...values,comments:"  "})).toBe(producerMessage({...values,comments:""}));
+});

@@ -112,7 +112,13 @@ export function ClientRenewal({
         <h3 className={styles.subheading}>
           Rate increase details <small>Optional</small>
         </h3>
-        <div className={styles.fields}>{inputs(details, false)}</div>
+        <div className={styles.fields}>{inputs(details, false)}
+          <label className={styles.comments}>Additional comments / findings
+            <textarea rows={4} value={values.comments || ""} onChange={e => {
+              setValues({...values, comments:e.target.value}); setStatus(""); setError("");
+            }} />
+          </label>
+        </div>
         <div className={styles.messagePreview}>
           <span className={styles.eyebrow}>RATE INCREASE MESSAGE</span>
           <p className={styles.note}>{noteError || message}</p>
