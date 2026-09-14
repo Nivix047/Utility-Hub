@@ -100,6 +100,7 @@ export function diarySubject(v: Values) {
   const policy = v.policyType?.trim();
   const term = v.term?.trim();
   const date = dateLabel(v.effDate || "");
-  if (!policy || !term || !date) throw new Error("Enter the policy type, term, and effective date.");
+  if (!policy || !term || !date)
+    throw new Error("Enter the policy type, term, and effective date.");
   return `${policy} ${term} (ren.prem.over.threshold) eff: ${date}`;
 }

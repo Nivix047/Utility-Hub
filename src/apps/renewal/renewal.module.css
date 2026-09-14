@@ -199,3 +199,57 @@
   padding-top: 28px;
   border-top: 1px solid #d9dfd2;
 }
+.subheading {
+  margin-top: 28px;
+}
+.subheading small,
+.groupHeader small {
+  font-size: 12px;
+  font-weight: 400;
+  color: #6c7e62;
+  margin-left: 8px;
+}
+.messagePreview {
+  background: #edf0e7;
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 24px;
+}
+.producerGroup {
+  border: 1px solid #d9dfd2;
+  padding: 20px;
+  border-radius: 16px;
+  margin-top: 18px;
+}
+.groupHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.groupHeader h3 {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.record {
+  border-top: 1px solid #d9dfd2;
+  margin-top: 18px;
+  padding-top: 18px;
+  overflow-wrap: anywhere;
+}
+.record .description {
+  margin: 8px 0;
+}
+.app button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+@media (max-width: 480px) {
+  .producerGroup {
+    padding: 15px;
+  }
+  .groupHeader h3 {
+    font-size: 16px;
+  }
+}

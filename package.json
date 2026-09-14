@@ -12,11 +12,13 @@
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
+    "pdfmake": "^0.2.23",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",
+    "@types/pdfmake": "^0.2.12",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
     "@vitejs/plugin-react": "^4.5.0",

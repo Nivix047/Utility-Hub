@@ -61,8 +61,16 @@ it("migrates every detailed note field and prioritizes coverage direction", () =
   expect(() => rateNote({ renewal: "100", expiring: "0" })).toThrow();
 });
 
-import { diarySubject } from './logic';
-it('creates a diary subject with trimmed policy and term and calendar date', () => {
-  expect(diarySubject({policyType:' Home ',term:' 12 months ',effDate:'2026-09-13'})).toBe('Home 12 months (ren.prem.over.threshold) eff: 09/13/26');
-  expect(() => diarySubject({policyType:'Home',term:' ',effDate:'2026-09-13'})).toThrow();
+import { diarySubject } from "./logic";
+it("creates a diary subject with trimmed policy and term and calendar date", () => {
+  expect(
+    diarySubject({
+      policyType: " Home ",
+      term: " 12 months ",
+      effDate: "2026-09-13",
+    }),
+  ).toBe("Home 12 months (ren.prem.over.threshold) eff: 09/13/26");
+  expect(() =>
+    diarySubject({ policyType: "Home", term: " ", effDate: "2026-09-13" }),
+  ).toThrow();
 });

@@ -35,23 +35,21 @@ Hash navigation supports browser Back/Forward, reloads and static hosting withou
 
 Inspected and migrated from [Nivix047/React-Renewal-Calculator](https://github.com/Nivix047/React-Renewal-Calculator), commit `29ac664772a12b64f43884f209797d3ac0aba4c1`. The source repository is unchanged.
 
-The original tools are combined on one page. Comparing premiums at or above both thresholds reveals the rate increase and email subject forms below the result. The note automatically uses the compared premiums. Changing premiums hides the follow-up forms and clears their drafts until another over-threshold calculation. Below threshold, only the standard generate-and-copy result is shown.
+The over-threshold flow now collects client last/first names, policy number, effective date and producer name, followed by optional Coverage A, deductible, property and company details. The rate increase message is generated from the entered premiums and details.
 
-All three original tools are included:
+- Add clients to producer lists, then download one PDF per producer. All PDF generation, including embedded fonts, runs in the browser; no client information is uploaded.
+- Producer names are grouped ignoring case and repeated spaces. The same producer, policy number and effective date updates an existing entry instead of duplicating it.
+- “Next client” clears the calculator and current form, keeping saved lists. Changing premiums clears the unsaved client form; add the client first.
+- Remove a saved entry with Undo available for the latest removal.
+- Saved lists use `sessionStorage`: retained across refresh and Home navigation in the same tab, normally cleared when that tab is closed. Browser session restoration can retain them. This is not a durable database or cross-device sync. Download PDFs before closing the tab. Storage failures are shown in the UI.
+- Producer name replaces “Emailed who.” Adding or exporting clients does not send emails. The separate diary/email generator forms have been replaced by this producer review workflow.
+- Below-threshold calculations still generate and copy the original note. Clipboard access requires localhost or HTTPS; selectable results remain available when copying is denied.
 
-1. **Rate calculator:** premium difference, percentage change, original message wording and rounding rules, and a threshold requiring both a 10% increase and a $100 increase.
-2. **Rate increase:** optional premium, Coverage A, deductible, year built, square footage, company, effective date and emailed recipient details, assembled into the original note format. Coverage A takes precedence when choosing the company's rate-change direction.
-3. **Email subject:** optional last/first name, policy number and effective date, with the original threshold tag.
+Date formatting avoids timezone shifts, zero expiring baselines and negative amounts are rejected, and the exact 10% plus $100 threshold is preserved. The only external UI request is Google Fonts, with local system-font fallbacks. PDF fonts are bundled and loaded only when exporting; the large PDF library is a separate lazy-loaded chunk.
 
-Generation copies the result automatically, with explicit feedback, a retry button, and selectable output if clipboard permission is denied. Clipboard access requires localhost or HTTPS.
+## Verification
 
-Intentional fixes: calendar dates no longer shift a day in western time zones; invalid/negative numeric amounts and zero expiring baselines produce errors instead of invalid percentages; reset clears output and status. Premium differences are rounded to cents to avoid floating-point noise. Original detailed-note signed decrease percentages are preserved.
-
-Drafts are held only in memory while the calculator is open. Returning Home or reloading clears them; policy details are not sent to a backend or saved in browser storage. Google Fonts is the only external UI request and has system-font fallbacks.
-
-## Verification in the build environment
-
-Production build and all six logic tests pass. The built-in browser verified launcher opening, threshold results, clipboard contents, invalid baseline feedback, reset, detailed notes, and subject generation. The mobile form was inspected at 390px with no horizontal overflow. The standalone Playwright suite is included but could not execute here: macOS sandbox restrictions prevent Chromium from registering its process service. Run `npm run test:e2e` outside that sandbox to complete automated browser verification. Native date entry could not be fully driven by the built-in browser automation; date formatting is covered by the logic tests.
+`npm run build` and all 12 tests pass, covering calculation boundaries, record validation, producer grouping, duplicate updates, storage parsing and multi-page PDF rendering. A five-page stress PDF was visually checked and all 24 sample policy IDs and accented names were verified in its extracted text. Browser interaction tests are included in `tests/`; standalone Playwright browser launch was blocked by this Mac's sandbox, so interactive verification uses the built-in browser instead.
 
 ## GitHub Pages
 
