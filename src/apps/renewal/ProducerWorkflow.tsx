@@ -177,8 +177,7 @@ export function ProducerLists({
       <h2>Ready for each producer.</h2>
       <p className={styles.description}>
         Each PDF contains one producer’s client names, policy numbers, effective
-        dates, and rate increase messages. Lists stay in this browser tab
-        through refreshes. Download before closing the tab.
+        dates, and rate increase messages. Lists are saved in this browser, even after closing it. Use Clear all renewal data to delete them.
       </p>
       {!records.length && (
         <p className={styles.description}>

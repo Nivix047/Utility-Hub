@@ -4,11 +4,11 @@ import { calculate, type Values } from "./logic";
 import { ClientRenewal, ProducerLists } from "./ProducerWorkflow";
 import { parseRecords, type RenewalRecord } from "./producerRecords";
 import styles from "./renewal.module.css";
-const storageKey = "utility-hub:producer-renewals:v1";
+import {storageKey, loadRecords, persistRecords} from "./renewalStorage";
 function initialList() {
   try {
     return {
-      records: parseRecords(sessionStorage.getItem(storageKey)),
+      records: loadRecords(localStorage, sessionStorage),
       warning: "",
     };
   } catch {
@@ -33,26 +33,41 @@ export default function Renewal() {
   useEffect(() => {
     if (initial.warning) return;
     try {
-      if (records.length) sessionStorage.setItem(storageKey, JSON.stringify(records));
-      else sessionStorage.removeItem(storageKey);
+      persistRecords(records, localStorage, sessionStorage);
       setStorageWarning("");
     } catch {
       setStorageWarning(
-        "The list could not be saved in this browser tab. Download your PDFs before refreshing or leaving.",
+        "The list could not be saved in local storage. Download your PDFs before refreshing or leaving.",
       );
     }
   }, [records, initial.warning]);
+  useEffect(() => {
+    const sync = (event: StorageEvent) => {
+      if (event.storageArea !== localStorage || (event.key !== storageKey && event.key !== null)) return;
+      try {
+        const updated = parseRecords(event.newValue);
+        setRecords(updated);
+        if (!updated.length) {
+          nextClient();
+          setClearVersion(v => v + 1);
+          setConfirmClear(false);
+        }
+      } catch { setStorageWarning("Saved data changed in another tab but could not be read. Refresh to retry."); }
+    };
+    window.addEventListener("storage", sync);
+    return () => window.removeEventListener("storage", sync);
+  }, []);
   function clearAll() {
     let warning = "";
-    try { sessionStorage.removeItem(storageKey); }
-    catch { warning = "The form and in-memory lists were cleared, but browser storage could not be accessed. Close this tab to discard its session data."; }
+    try { persistRecords([], localStorage, sessionStorage); }
+    catch { warning = "The form and in-memory lists were cleared, but browser storage could not be accessed. Use your browser’s site-data settings to remove any saved copy."; }
     setInitial({records: [], warning});
     setRecords([]);
     setStorageWarning(warning);
     nextClient();
     setClearVersion(v => v + 1);
     setConfirmClear(false);
-    setClearStatus(warning ? "In-memory data cleared." : "All renewal data in this tab has been cleared.");
+    setClearStatus(warning ? "In-memory data cleared." : "All saved renewal data in this browser has been cleared.");
   }
   function clearResult() {
     setStats(null);
@@ -208,7 +223,7 @@ export default function Renewal() {
         <button type="button" onClick={() => { setConfirmClear(true); setClearStatus(""); }}>Clear all renewal data</button>
         {confirmClear && <section role="alertdialog" aria-labelledby="clear-title" aria-describedby="clear-description" className={styles.messagePreview}>
           <h3 id="clear-title">Are you sure?</h3>
-          <p id="clear-description">Delete all saved producer lists and current form data from this browser tab? This cannot be undone. Downloaded PDFs and other websites’ data are not affected.</p>
+          <p id="clear-description">Delete all saved producer lists and current form data from this browser? This cannot be undone. Downloaded PDFs and other websites’ data are not affected.</p>
           <div className={styles.actions}>
             <button type="button" onClick={clearAll}>Yes, delete all renewal data</button>
             <button type="button" autoFocus onClick={() => setConfirmClear(false)}>No, keep my data</button>
