@@ -1,5 +1,33 @@
 import type { TDocumentDefinitions } from "pdfmake/interfaces";
 import { dateLabel, type RenewalRecord } from "./producerRecords";
+const policyWidth = 110;
+// Conservative Roboto glyph widths keep full identifiers inside their column.
+export function policyFontSize(policy: string) {
+  const width = Array.from(policy).reduce(
+    (total, c) =>
+      total +
+      (/[0-9]/.test(c)
+        ? 0.57
+        : /[ilI1.,:;!'|]/.test(c)
+          ? 0.34
+          : /[MWmw@%]/.test(c)
+            ? 1
+            : /[a-z]/.test(c)
+              ? 0.65
+              : /[A-Z]/.test(c)
+                ? 0.8
+                : /[\s-]/.test(c)
+                  ? 0.4
+                  : 1.2),
+    0,
+  );
+  return Math.min(9, (policyWidth - 2) / Math.max(width, 1));
+}
+export function sortByIncrease(records: RenewalRecord[]) {
+  const increase = (r: RenewalRecord) =>
+    r.expiring > 0 ? (r.renewal - r.expiring) / r.expiring : -Infinity;
+  return [...records].sort((a, b) => increase(b) - increase(a));
+}
 export function producerDocument(
   producer: string,
   records: RenewalRecord[],
@@ -39,7 +67,7 @@ export function producerDocument(
       {
         table: {
           headerRows: 1,
-          widths: [95, 72, 57, "*"],
+          widths: [85, policyWidth, 57, "*"],
           body: [
             [
               "Client",
@@ -53,14 +81,17 @@ export function producerDocument(
               fillColor: "#304e3c",
               margin: [0, 5, 0, 5] as [number, number, number, number],
             })),
-            ...records.map((r, i) =>
+            ...sortByIncrease(records).map((r, i) =>
               [
                 `${r.lastName}, ${r.firstName}`,
                 r.policyNumber,
                 dateLabel(r.effDate),
                 r.message,
-              ].map((text) => ({
+              ].map((text, column) => ({
                 text,
+                ...(column === 1
+                  ? { noWrap: true, fontSize: policyFontSize(text) }
+                  : {}),
                 fillColor: i % 2 === 0 ? "#f0f3eb" : "#ffffff",
                 margin: [0, 5, 0, 5] as [number, number, number, number],
               })),

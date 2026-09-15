@@ -2,14 +2,18 @@ import { it, expect } from "vitest";
 import pdfMake from "pdfmake/build/pdfmake";
 import fonts from "pdfmake/build/vfs_fonts";
 import { writeFileSync } from "node:fs";
-import { producerDocument } from "./producerPdf";
+import {
+  producerDocument,
+  sortByIncrease,
+  policyFontSize,
+} from "./producerPdf";
 import { makeRecord } from "./producerRecords";
 it("renders long, multi-page producer PDFs with client details", async () => {
   const records = Array.from({ length: 24 }, (_, i) => ({
     ...makeRecord({
       lastName: "García-Smith",
       firstName: "Zoë",
-      policyNumber: `POLICY-${i + 1}`,
+      policyNumber: `POLICY-LONG-IDENTIFIER-123456789-${i + 1}`,
       effDate: "2026-09-13",
       producer: "Alex Lee",
       renewal: "1350",
@@ -38,3 +42,28 @@ it("renders long, multi-page producer PDFs with client details", async () => {
   expect(buffer.length).toBeGreaterThan(10000);
   if (process.env.PDF_QA_PATH) writeFileSync(process.env.PDF_QA_PATH, buffer);
 }, 20000);
+
+it("sorts by premium percentage increase without changing the saved list", () => {
+  const base = makeRecord({
+    lastName: "Smith",
+    firstName: "Jane",
+    policyNumber: "1",
+    effDate: "2026-09-13",
+    producer: "Alex",
+    renewal: "1100",
+    expiring: "1000",
+  });
+  const records = [
+    { ...base, policyNumber: "low", renewal: 1100 },
+    { ...base, policyNumber: "highest", renewal: 5000, expiring: 2500 },
+    { ...base, policyNumber: "middle", renewal: 1500 },
+  ];
+  expect(sortByIncrease(records).map((r) => r.policyNumber)).toEqual([
+    "highest",
+    "middle",
+    "low",
+  ]);
+  expect(records[0].policyNumber).toBe("low");
+  expect(policyFontSize("123456")).toBe(9);
+  expect(policyFontSize("POLICY-LONG-IDENTIFIER-123456789-1")).toBeLessThan(9);
+});
