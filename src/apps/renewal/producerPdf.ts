@@ -28,6 +28,15 @@ export function sortByIncrease(records: RenewalRecord[]) {
     r.expiring > 0 ? (r.renewal - r.expiring) / r.expiring : -Infinity;
   return [...records].sort((a, b) => increase(b) - increase(a));
 }
+export function highlightedPremium(message: string) {
+  const match = /^(Per DL FT .*? approx )([\d,.]+%)/.exec(message);
+  if (!match) return message;
+  return [
+    { text: match[1] },
+    { text: match[2], background: "#fff29a", bold: true },
+    { text: message.slice(match[0].length) },
+  ];
+}
 export function producerDocument(
   producer: string,
   records: RenewalRecord[],
@@ -88,7 +97,7 @@ export function producerDocument(
                 dateLabel(r.effDate),
                 r.message,
               ].map((text, column) => ({
-                text,
+                text: column === 3 ? highlightedPremium(text) : text,
                 ...(column === 1
                   ? { noWrap: true, fontSize: policyFontSize(text) }
                   : {}),

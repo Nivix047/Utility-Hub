@@ -4,6 +4,7 @@ import fonts from "pdfmake/build/vfs_fonts";
 import { writeFileSync } from "node:fs";
 import {
   producerDocument,
+  highlightedPremium,
   sortByIncrease,
   policyFontSize,
 } from "./producerPdf";
@@ -66,4 +67,19 @@ it("sorts by premium percentage increase without changing the saved list", () =>
   expect(records[0].policyNumber).toBe("low");
   expect(policyFontSize("123456")).toBe(9);
   expect(policyFontSize("POLICY-LONG-IDENTIFIER-123456789-1")).toBeLessThan(9);
+});
+
+it("highlights only the premium percentage while preserving the full message", () => {
+  const message =
+    "Per DL FT $5,000.00 (was $2,500.00) approx 100.00% increase. Cov.A at $300,000.00 (was $150,000.00) 100.00% increase. Emailed JYY.";
+  const parts = highlightedPremium(message);
+  expect(Array.isArray(parts)).toBe(true);
+  if (typeof parts === "string") throw new Error("Missing highlight");
+  expect(parts.map((part) => part.text).join("")).toBe(message);
+  expect(
+    parts.filter((part) => part.background).map((part) => part.text),
+  ).toEqual(["100.00%"]);
+  expect(highlightedPremium("Coverage increased 100.00%.")).toBe(
+    "Coverage increased 100.00%.",
+  );
 });
